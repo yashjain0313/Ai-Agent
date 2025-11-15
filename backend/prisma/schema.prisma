@@ -1,0 +1,52 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider             = "prisma-client-py"
+  recursive_type_depth = 5
+}
+
+model Resume {
+  id        String   @id @default(uuid())
+  userId    String?
+  fileName  String
+  fileUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Parsed data from RIA
+  fullName  String
+  email     String?
+  phone     String?
+  location  String?
+  summary   String?
+  rawText   String?
+
+  // Job factors from SQA
+  jobFactors JobFactors?
+
+  @@map("resumes")
+}
+
+model JobFactors {
+  id               String   @id @default(uuid())
+  resumeId         String   @unique
+  resume           Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  
+  // Critical job-search factors
+  experienceYears  Float
+  jobRole          String
+  techStack        String[] // Array of technologies
+  tools            String[] // Array of tools/platforms
+  primarySkills    String[] // Top 5 skills
+  
+  // Generated queries
+  searchQueries    String[] // 20 optimized queries
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("job_factors")
+}
