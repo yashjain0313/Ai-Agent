@@ -15,17 +15,14 @@ export default function ResumeUpload() {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    // Reset
     setError("");
     setDiscoveryResult(null);
     setUploading(true);
 
     try {
-      // Upload
       const { file_id } = await uploadResumeToBackend(file);
       setFileId(file_id);
 
-      // Auto-trigger job discovery (runs RIA + SQA + JDA in backend)
       const result = await discoverJobs(file_id);
       setDiscoveryResult(result.discovery_result);
       setUploading(false);
@@ -43,101 +40,97 @@ export default function ResumeUpload() {
   });
 
   return (
-    <div className="min-h-screen bg-black text-white py-12 px-4">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-white text-black">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center border-b border-gray-800 pb-8">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent mb-4">
+        <div className="border-b border-black pb-6 mb-8">
+          <h1 className="text-4xl font-bold text-black mb-2">
             AI Job Discovery Platform
           </h1>
-          <p className="text-gray-400 text-lg">
-            Upload Resume → Get Real Jobs from 100+ Sources Worldwide
+          <p className="text-gray-600">
+            Upload resume, get real jobs from 100+ sources worldwide
           </p>
         </div>
 
         {/* Upload Area */}
         <div
           {...getRootProps()}
-          className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 ${
+          className={`border-2 ${
             isDragActive
-              ? "border-white bg-gray-900"
-              : "border-gray-700 hover:border-gray-500 bg-gray-950"
-          }`}
+              ? "border-black bg-gray-50"
+              : "border-gray-300 hover:border-black"
+          } cursor-pointer transition-colors mb-8`}
         >
           <input {...getInputProps()} />
-          {!uploading ? (
-            <div className="space-y-4">
-              <Upload className="mx-auto h-16 w-16 text-gray-500" />
-              <div>
-                <p className="text-xl font-semibold text-gray-300">
-                  {isDragActive ? "Drop here" : "Drop PDF or Click"}
-                </p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Supports PDF resumes only
-                </p>
+          <div className="p-16 text-center">
+            {!uploading ? (
+              <div className="space-y-3">
+                <Upload className="mx-auto h-12 w-12 text-black" />
+                <div>
+                  <p className="text-lg font-medium text-black">
+                    {isDragActive
+                      ? "Drop PDF here"
+                      : "Drop PDF or click to upload"}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">PDF format only</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <Loader2 className="mx-auto h-16 w-16 text-white animate-spin" />
-              <p className="text-gray-300">
-                Analyzing resume and discovering jobs...
-              </p>
-              <p className="text-sm text-gray-500">
-                This may take 30-60 seconds
-              </p>
-            </div>
-          )}
+            ) : (
+              <div className="space-y-3">
+                <Loader2 className="mx-auto h-12 w-12 text-black animate-spin" />
+                <p className="text-black">
+                  Analyzing resume and discovering jobs
+                </p>
+                <p className="text-sm text-gray-500">30-60 seconds</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="bg-red-950 border border-red-800 rounded-lg p-4">
-            <p className="text-red-400">{error}</p>
+          <div className="border-2 border-black bg-white p-4 mb-8">
+            <p className="text-black">{error}</p>
           </div>
         )}
 
         {/* Jobs Display */}
         {discoveryResult && (
           <div className="space-y-6">
-            {/* Header Stats */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-center">
-              <h2 className="text-3xl font-bold text-white mb-2">
+            {/* Stats */}
+            <div className="border-2 border-black bg-black text-white p-6">
+              <h2 className="text-2xl font-bold mb-1">
                 {discoveryResult.total_jobs} Jobs Found
               </h2>
-              <p className="text-blue-100">
-                Matched to your resume from global sources
-              </p>
+              <p className="text-gray-300">Matched from global sources</p>
             </div>
 
             {/* Job Listings */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {discoveryResult.jobs.map((job: any, idx: number) => (
                 <div
                   key={idx}
-                  className="bg-gray-950 border border-gray-800 rounded-xl p-6 hover:border-gray-600 hover:shadow-xl transition-all"
+                  className="border-2 border-black p-6 hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
-                      <h3 className="text-white font-bold text-xl mb-1">
+                  <div className="mb-4">
+                    <div className="flex items-start justify-between gap-4 mb-2">
+                      <h3 className="text-xl font-bold text-black">
                         {job.title}
                       </h3>
-                      <span className="px-2 py-1 mt-1 mb-1 bg-blue-900/30 border border-blue-700 text-blue-300 text-xs rounded">
+                      <span className="px-2 py-1 bg-black text-white text-xs font-mono shrink-0">
                         {job.source}
                       </span>
-                      <p className="text-gray-300 font-medium text-lg">
-                        {job.company}
-                      </p>
                     </div>
+                    <p className="text-lg text-black font-medium">
+                      {job.company}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-6 text-gray-400 mb-4">
-                    <span className="flex items-center gap-1">
-                      📍 {job.location}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      💼 {job.experience}
-                    </span>
+
+                  <div className="flex gap-6 text-sm text-gray-600 mb-4">
+                    <span>Location: {job.location}</span>
+                    <span>Experience: {job.experience}</span>
                   </div>
+
                   {job.skills_required && job.skills_required.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-4">
                       {job.skills_required
@@ -145,20 +138,21 @@ export default function ResumeUpload() {
                         .map((skill: string, i: number) => (
                           <span
                             key={i}
-                            className="px-3 py-1 bg-gray-900 border border-gray-700 rounded-full text-sm text-gray-300"
+                            className="px-2 py-1 border border-black text-xs text-black"
                           >
                             {skill}
                           </span>
                         ))}
                     </div>
                   )}
+
                   <a
                     href={job.apply_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-lg transition-all"
+                    className="inline-block px-6 py-2 bg-black text-white font-medium hover:bg-gray-800 transition-colors"
                   >
-                    Apply Now →
+                    Apply Now
                   </a>
                 </div>
               ))}
